@@ -6,6 +6,40 @@
 
 using namespace std;
 
+int calculate_board_cost(vector<int> &v, int width, int start, int end)
+{
+	int cost = v[start];
+	while (start < end)
+	{
+		start += 1;
+		cost += v[start];
+	}
+	return cost;
+}
+
+vector<int> find_splits(vector<int> &row_change, int n)
+{
+	vector<int> split;
+	int i = 0;
+	while (i < n)
+	{
+		split.push_back(i + 1);
+		split.push_back(row_change[i] + 1);
+		i = row_change[i] + 1;
+	}
+	return split;
+}
+
+void print_results(vector<int> &v, int width, vector<int> &split, int board_cost)
+{
+	cout << "Board cost: " << board_cost << "\n";
+	for (int i = 0; i < split.size(); i += 2)
+	{
+		cout << "(" << split[i] << ", " << split[i + 1] << ") --> " << calculate_board_cost(v, width, split[i] - 1, split[i + 1] - 1) << "\n";
+	}
+	cout << "\n";
+}
+
 void minBoardCost(vector<int> &v, int w)
 {
 	int n = v.size();
@@ -40,23 +74,8 @@ void minBoardCost(vector<int> &v, int w)
 		}
 		dp[i] = rowCost;
 	}
-	//for (int i = 0; i < dp.size(); i++)
-	//	cout << dp[i] << " ";
-	//cout << endl;
-	int i = 0;
-	while (i < n)
-	{
-		split.push_back(i + 1);
-		split.push_back(row_change[i] + 1);
-		i = row_change[i] + 1;
-	}
-	for (i = 0; i < split.size(); i++)
-	{
-		cout << split[i] << " ";
-	}
-	cout << endl;
-	//return split;
-	//cout << dp[0] << endl;
+	split = find_splits(row_change, n);
+	print_results(v, w, split, dp[0]);
 }
 
 int main()

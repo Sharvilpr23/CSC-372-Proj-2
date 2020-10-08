@@ -6,30 +6,49 @@
 
 using namespace std;
 
+#define INFIN INT_MAX //Infinity
+
+/*
+	Calculates the sum of the widths of the announcements on a particular row
+	
+	Indexing: 0-based
+*/
 int calculate_board_cost(vector<int> &v, int width, int start, int end)
 {
-	int cost = v[start];
+	int sum = v[start];
 	while (start < end)
 	{
 		start += 1;
-		cost += v[start];
+		sum += v[start];
 	}
-	return cost;
+	return sum;
 }
 
-vector<int> find_splits(vector<int> &row_change, int n)
+/*
+	Creates a split vector where split[i] is the start and split[i + 1] is 
+	where the index of the last announcement on the row.
+
+	Indexing: 0-based
+*/
+vector<int> find_splits(vector<int> &jump, int n)
 {
 	vector<int> split;
 	int i = 0;
 	while (i < n)
 	{
 		split.push_back(i + 1);
-		split.push_back(row_change[i] + 1);
-		i = row_change[i] + 1;
+		split.push_back(jump[i] + 1);
+		i = jump[i] + 1;
 	}
 	return split;
 }
 
+/*
+	Prints the minimum boardcost and tthen lists the splits with their 
+	corresponding costs.
+
+	Indexing: 0-based
+*/
 void print_results(vector<int> &v, int width, vector<int> &split, int board_cost)
 {
 	cout << "Board cost: " << board_cost << "\n";
@@ -40,41 +59,48 @@ void print_results(vector<int> &v, int width, vector<int> &split, int board_cost
 	cout << "\n";
 }
 
-void minBoardCost(vector<int> &v, int w)
+/*
+	Generates a dp vector which stores the most optimal solution for each of 
+	the announcements
+
+	Indexing: 0-based
+*/
+void minBoardCost(vector<int> &v, int w, int n)
 {
-	int n = v.size();
 	int currCost = 0;
 	vector<int> dp;
-	vector<int> row_change;
-	vector<int> split;
-	dp.resize(v.size() + 1);
-	row_change.resize(v.size() + 1);
-	dp[v.size()] = 0;
-	dp[v.size() - 1] = 0;
-	row_change[v.size() - 1] = v.size() - 1;
+	vector<int> jump;  //Tracks where to and how much to jump
+	vector<int> split; //Stores the
 
-	for (int i = v.size() - 2; i >= 0; i--)
+	dp.resize(n + 1);
+	jump.resize(n);
+
+	dp[n] = 0;
+	dp[n - 1] = 0;
+	jump[n - 1] = n - 1;
+
+	for (int i = n - 2; i >= 0; i--)
 	{
 		int rowLen = 0;
-		int rowCost = INT_MAX;
-		for (int j = i; j < v.size(); j++)
+		int rowCost = INFIN;
+		for (int j = i; j < n; j++)
 		{
 			rowLen += v[j];
 			if (rowLen > w)
 				break;
 			else if (j == n - 1)
-				currCost = 0;
+				currCost = 0; //GRADING UPDATE
 			else
-				currCost = dp[j + 1] + int(pow((w - rowLen), 3));
+				currCost = dp[j + 1] + int(pow((w - rowLen), 3)); //GRADING: REUSE
 			if (rowCost > currCost)
 			{
-				rowCost = min(rowCost, currCost);
-				row_change[i] = j;
+				rowCost = min(rowCost, currCost); //GRADING: UPDATE
+				jump[i] = j;
 			}
 		}
-		dp[i] = rowCost;
+		dp[i] = rowCost; //GRADING: UPDATE
 	}
-	split = find_splits(row_change, n);
+	split = find_splits(jump, n);
 	print_results(v, w, split, dp[0]);
 }
 
@@ -85,15 +111,17 @@ int main()
 	int n;
 	int a;
 
+	// Row width, number of announcements
 	cin >> w >> n;
 
-	while (n--)
+	int loop_counter = n;
+	while (loop_counter--)
 	{
 		cin >> a;
 		v.push_back(a);
 	}
 
-	minBoardCost(v, w);
+	minBoardCost(v, w, n);
 
 	return 0;
 }
